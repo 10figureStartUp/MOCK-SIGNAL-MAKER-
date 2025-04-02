@@ -1,13 +1,662 @@
+/* Base styles */
 body {
   margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f7fa;
+  color: #333;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Form elements */
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* PWA specific */
+/* These styles help create a more app-like feel on mobile */
+@media (display-mode: standalone) {
+  body {
+    /* Remove browser-specific margins for a more app-like feel */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    /* Prevent text selection in PWA mode for a more native feel */
+    user-select: none;
+  }
+  
+  /* Add an app-like header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Disable text zoom for consistent UI in PWA mode */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background-color: white;
+  }
+  
+  .preview-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+  
+  /* Hide elements that don't need to be printed */
+  .image-upload, .form-container {
+    display: none;
+  }
+}
+
+/* Modern Dark Theme Variables */
+:root {
+  --bg-color: #0a0a0a;
+  --card-color: #121212;
+  --text-color: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent-color: #2563eb;
+  --accent-color-buy: #4caf50;
+  --accent-color-sell: #f44336;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --warning-bg: rgba(247, 183, 49, 0.1);
+  --warning-icon: #f7b731;
+  --pill-bg-active: #2563eb;
+  --pill-bg-inactive: rgba(255, 255, 255, 0.05);
+  --pill-text-active: #ffffff;
+  --pill-text-inactive: rgba(255, 255, 255, 0.7);
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  gap: 2rem;
+}
+
+/* Modal Styles */
+.modal {
+  background-color: var(--card-color);
+  border-radius: 16px;
+  box-shadow: 0 5px 20px var(--shadow-color);
+  width: 100%;
+  max-width: 550px;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2.5rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.modal-body {
+  padding: 1.5rem 2.5rem;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info-icon {
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+/* Upload Area Styles */
+.upload-area {
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.upload-area:hover {
+  border-color: var(--accent-color);
+}
+
+.upload-text {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.upload-subtext {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.browse-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.25rem;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.browse-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Pill Selector */
+.pill-selector {
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  overflow: hidden;
+  background-color: var(--pill-bg-inactive);
+  padding: 0.25rem;
+  width: fit-content;
+}
+
+.pill-button {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  background-color: transparent;
+  color: var(--pill-text-inactive);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 9999px;
+}
+
+.pill-button.active {
+  background-color: var(--pill-bg-active);
+  color: var(--pill-text-active);
+}
+
+/* Select Input */
+.select-container {
+  position: relative;
+}
+
+.select-container:after {
+  content: '\25BC';
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.select {
+  appearance: none;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+/* Buttons */
+.add-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-button:hover {
+  background-color: #1d4ed8;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.remove-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Warning Box */
+.warning-box {
+  background-color: var(--warning-bg);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.warning-icon {
+  color: var(--warning-icon);
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.warning-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.entry-label {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Split input fields layout */
+.input-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.input-row .form-group {
+  flex: 1;
+}
+
+/* Buy/Sell option buttons */
+.option-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.option-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.option-button.buy.active {
+  background-color: rgba(76, 175, 80, 0.2);
+  border-color: var(--accent-color-buy);
+  color: var(--accent-color-buy);
+}
+
+.option-button.sell.active {
+  background-color: rgba(244, 67, 54, 0.2);
+  border-color: var(--accent-color-sell);
+  color: var(--accent-color-sell);
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0 2.5rem;
+}
+
+/* Preview Card Styles */
+.preview-card {
+  background-color: var(--card-color);
+  border-radius: 16px;
+  box-shadow: 0 5px 20px var(--shadow-color);
+  width: 100%;
+  max-width: 300px;
+  overflow: hidden;
+  align-self: flex-start;
+  margin-top: 2rem;
+}
+
+.preview-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.preview-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.preview-body {
+  padding: 1.5rem;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.preview-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.preview-value {
+  font-weight: 500;
+}
+
+.preview-type {
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--accent-color-buy);
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.preview-type.sell {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--accent-color-sell);
+}
+
+.preview-desc {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.preview-desc p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Responsive Styles */
+@media (max-width: 950px) {
+  body {
+      flex-direction: column;
+      align-items: center;
+  }
+  
+  .preview-card {
+      max-width: 550px;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal {
+      border-radius: 12px;
+      max-width: 100%;
+  }
+  
+  .modal-header {
+      padding: 1.5rem 1.5rem 1rem;
+  }
+  
+  .modal-body {
+      padding: 1.5rem;
+  }
+  
+  .section-title {
+      font-size: 1.25rem;
+  }
+  
+  .input-row {
+      flex-direction: column;
+      gap: 0.5rem;
+  }
+  
+  .divider {
+      margin: 0 1.5rem;
+  }
+}
+
+/* Upload Icon SVG Positioning */
+.upload-icon {
+  color: var(--text-secondary);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.browse-icon {
+  margin-right: 0.5rem;
+  color: var(--accent-color);
+}
+
+.add-icon {
+  margin-right: 0.5rem;
+}
+
+/* PWA specific styling */
+@media (display-mode: standalone) {
+  body {
+      padding: 0;
+  }
+  
+  .modal, .preview-card {
+      border-radius: 0;
+      box-shadow: none;
+      max-width: 100%;
+  }
+}
+
+/* Supporting the uploaded images display */
+.uploaded-image {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.upload-input {
+  display: none;
+}
+
+/* Add this new container class */
+.app-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Fix the preview card layout */
+.preview-card {
+  position: sticky;
+  top: 2rem;
+  max-width: 300px;
+  min-width: 300px;
+  height: fit-content;
+  margin-top: 0;
+}
+
+/* Modify the responsive behavior */
+@media (max-width: 950px) {
+  .app-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .preview-card {
+    position: static;
+    max-width: 350px;
+    margin: 0;
+    order: 1;
+  }
+  
+  .modal {
+    order: 2;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .preview-card {
+    max-width: 100%;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Fix for dropdown text color issue */
+.select-container select,
+.select-container select option {
+  color: var(--text-color); /* Ensures text is visible against the background */
+}
+
+/* Make dropdown options visible against white background */
+.select-container select option {
+  background-color: var(--card-color); /* Dark background for options */
+  color: var(--text-color); /* Light text color */
+}
+
+/* Improve hover state visibility */
+.select-container select option:hover,
+.select-container select option:focus,
+.select-container select option:active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+/* Ensure dropdown arrow is visible */
+.select-container:after {
+  color: var(--text-color);
 }
