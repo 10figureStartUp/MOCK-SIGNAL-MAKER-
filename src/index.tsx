@@ -1,7 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 import App from './App';
-import './index.css';
+import theme from './theme';
 
 // Get the root element
 const container = document.getElementById('root');
@@ -14,7 +15,10 @@ if (container) {
   // Render app to root
   root.render(
     <React.StrictMode>
-      <App />
+      <ThemeProvider theme={theme}>
+        <CssBaseline /> {/* Normalizes CSS and applies theme background */}
+        <App />
+      </ThemeProvider>
     </React.StrictMode>
   );
 }

@@ -62,15 +62,12 @@ button:active {
 /* These styles help create a more app-like feel on mobile */
 @media (display-mode: standalone) {
   body {
-    /* Remove browser-specific margins for a more app-like feel */
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    /* Prevent text selection in PWA mode for a more native feel */
     user-select: none;
   }
   
-  /* Add an app-like header */
   header {
     position: sticky;
     top: 0;
@@ -79,7 +76,6 @@ button:active {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
-  /* Disable text zoom for consistent UI in PWA mode */
   html {
     -webkit-text-size-adjust: 100%;
   }
@@ -96,7 +92,6 @@ button:active {
     border: 1px solid #ccc;
   }
   
-  /* Hide elements that don't need to be printed */
   .image-upload, .form-container {
     display: none;
   }
@@ -503,6 +498,7 @@ body {
       align-items: center;
   }
   
+  /* Removed any ordering rules from global CSS so our component ordering applies */
   .preview-card {
       max-width: 550px;
       margin-top: 2rem;
@@ -580,75 +576,19 @@ body {
   display: none;
 }
 
-/* Add this new container class */
-.app-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 2rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-/* Fix the preview card layout */
-.preview-card {
-  position: sticky;
-  top: 2rem;
-  max-width: 300px;
-  min-width: 300px;
-  height: fit-content;
-  margin-top: 0;
-}
-
-/* Modify the responsive behavior */
-@media (max-width: 950px) {
-  .app-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  
-  .preview-card {
-    position: static;
-    max-width: 350px;
-    margin: 0;
-    order: 1;
-  }
-  
-  .modal {
-    order: 2;
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-container {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .preview-card {
-    max-width: 100%;
-    width: 100%;
-    margin-bottom: 2rem;
-  }
-}
+/* Removed the .app-container ordering rules since our React component handles ordering */
 
 /* Fix for dropdown text color issue */
 .select-container select,
 .select-container select option {
-  color: var(--text-color); /* Ensures text is visible against the background */
+  color: var(--text-color);
 }
 
-/* Make dropdown options visible against white background */
 .select-container select option {
-  background-color: var(--card-color); /* Dark background for options */
-  color: var(--text-color); /* Light text color */
+  background-color: var(--card-color);
+  color: var(--text-color);
 }
 
-/* Improve hover state visibility */
 .select-container select option:hover,
 .select-container select option:focus,
 .select-container select option:active {
@@ -656,7 +596,6 @@ body {
   color: white;
 }
 
-/* Ensure dropdown arrow is visible */
 .select-container:after {
   color: var(--text-color);
 }

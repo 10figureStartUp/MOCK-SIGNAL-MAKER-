@@ -1,5 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Signal, CMEFuture } from './types';
+import { 
+  Box, 
+  Button, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  Container, 
+  Divider, 
+  FormControl, 
+  IconButton, 
+  InputAdornment, 
+  InputLabel, 
+  MenuItem, 
+  Paper, 
+  Select, 
+  Stack, 
+  TextField, 
+  ToggleButton, 
+  ToggleButtonGroup, 
+  Typography, 
+  useMediaQuery, 
+  useTheme 
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // Define CME Futures contracts with accurate values
 const cmeFutures: CMEFuture[] = [
@@ -9,6 +39,29 @@ const cmeFutures: CMEFuture[] = [
   { symbol: 'MNQ', name: 'Micro E-mini NASDAQ 100', pointValue: 2, tickValue: 0.5, ticksPerPoint: 4 },
   { symbol: 'MGC', name: 'Micro Gold', pointValue: 10, tickValue: 1, ticksPerPoint: 10 },
 ];
+
+// Styled components
+const UploadArea = styled(Box)(({ theme }) => ({
+  border: `2px dashed ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(4),
+  textAlign: 'center',
+  marginBottom: theme.spacing(2),
+  cursor: 'pointer',
+  transition: 'border-color 0.2s',
+  '&:hover': {
+    borderColor: theme.palette.primary.main,
+  }
+}));
+
+const PreviewLabel = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: '0.9rem',
+}));
+
+const PreviewValue = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+}));
 
 const App: React.FC = () => {
   // State for form inputs
@@ -32,6 +85,10 @@ const App: React.FC = () => {
   const [calculatedTakeProfit, setCalculatedTakeProfit] = useState<number>(0);
   const [potentialProfit, setPotentialProfit] = useState<number>(0);
   const [potentialLoss, setPotentialLoss] = useState<number>(0);
+  
+  // Theme and media queries
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -196,336 +253,454 @@ const App: React.FC = () => {
     }
   };
 
-  return (
-    <div className="app-container">
-      {/* Preview Card */}
-      <div className="preview-card">
-        <div className="preview-header">
-          <h3>Signal Preview</h3>
-        </div>
-        <div className="preview-body">
-          <div className="preview-row">
-            <span className="preview-label">Symbol:</span>
-            <span className="preview-value">{symbol || '—'}</span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Contracts:</span>
-            <span className="preview-value">{contractQuantity} {contractQuantity === 1 ? 'Contract' : 'Contracts'}</span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Order Type:</span>
-            <span className="preview-value">{orderType}</span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Type:</span>
-            <span className={`preview-value preview-type ${type === 'sell' ? 'sell' : ''}`}>
+  // Handle mode change
+  const handleModeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newMode: 'price' | 'points' | 'ticks' | null,
+  ) => {
+    if (newMode !== null) {
+      setMode(newMode);
+    }
+  };
+
+  // Handle type change
+  const handleTypeChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newType: 'buy' | 'sell' | null,
+  ) => {
+    if (newType !== null) {
+      setType(newType);
+    }
+  };
+
+  // Signal Form Component
+  const SignalFormComponent = (
+    <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" fontWeight={700}>Create New Signal</Typography>
+        <IconButton>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      
+      <Divider />
+      
+      <Box sx={{ p: 3 }}>
+        <Stack spacing={4}>
+          {/* Chart Upload Section */}
+          <Box>
+            <Typography variant="h6" fontWeight={600} mb={2}>
+              Chart Image (Optional)
+            </Typography>
+            
+            <UploadArea
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={handleBrowseClick}
+            >
+              {image ? (
+                <Box component="img" src={image} alt="Chart" sx={{ maxWidth: '100%', borderRadius: 1 }} />
+              ) : (
+                <>
+                  <UploadFileIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
+                  <Typography variant="body1" fontWeight={500} mb={0.5}>
+                    Drag & Drop Image
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" mb={1.5}>
+                    or
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<AddIcon />}
+                    onClick={handleBrowseClick}
+                  >
+                    Browse Files
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                </>
+              )}
+            </UploadArea>
+          </Box>
+          
+          {/* Asset Information Section */}
+          <Box>
+            <Typography variant="h6" fontWeight={600} mb={2}>
+              Asset Information
+            </Typography>
+            
+            <Stack spacing={2}>
+              <FormControl fullWidth>
+                <InputLabel id="symbol-label">Select Symbol *</InputLabel>
+                <Select
+                  labelId="symbol-label"
+                  value={symbol}
+                  label="Select Symbol *"
+                  onChange={(e) => setSymbol(e.target.value)}
+                >
+                  <MenuItem value="" disabled>Select Symbol *</MenuItem>
+                  {cmeFutures.map(future => (
+                    <MenuItem key={future.symbol} value={future.symbol}>
+                      {future.symbol} - {future.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <TextField
+                label="Asset Name *"
+                value={assetName}
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+              />
+            </Stack>
+          </Box>
+          
+          {/* Signal Details Section */}
+          <Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+              <Typography variant="h6" fontWeight={600}>
+                Signal Details
+              </Typography>
+              <InfoOutlinedIcon color="action" fontSize="small" />
+            </Box>
+            
+            <Stack spacing={2}>
+              {/* Pill Selector for Price/Points/Ticks */}
+              <ToggleButtonGroup
+                value={mode}
+                exclusive
+                onChange={handleModeChange}
+                aria-label="calculation mode"
+                size="small"
+                sx={{ 
+                  bgcolor: 'background.paper',
+                  borderRadius: 4,
+                  '& .MuiToggleButton-root': {
+                    borderRadius: 4,
+                    px: 3,
+                    py: 1,
+                    mx: 0.5,
+                    textTransform: 'capitalize'
+                  }
+                }}
+              >
+                <ToggleButton value="price">Price</ToggleButton>
+                <ToggleButton value="points">Points</ToggleButton>
+                <ToggleButton value="ticks">Ticks</ToggleButton>
+              </ToggleButtonGroup>
+              
+              <TextField
+                label="Description *"
+                multiline
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                fullWidth
+                required
+              />
+              
+              <FormControl fullWidth>
+                <InputLabel id="order-type-label">Order Type</InputLabel>
+                <Select
+                  labelId="order-type-label"
+                  value={orderType}
+                  label="Order Type"
+                  onChange={(e) => setOrderType(e.target.value as 'MARKET' | 'LIMIT' | 'STOP')}
+                >
+                  <MenuItem value="MARKET">MARKET</MenuItem>
+                  <MenuItem value="LIMIT">LIMIT</MenuItem>
+                  <MenuItem value="STOP">STOP</MenuItem>
+                </Select>
+              </FormControl>
+              
+              <TextField
+                label="How Many Contracts *"
+                type="number"
+                value={contractQuantity || ''}
+                onChange={(e) => setContractQuantity(parseInt(e.target.value) || 1)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {contractQuantity === 1 ? 'Contract' : 'Contracts'}
+                    </InputAdornment>
+                  ),
+                }}
+                fullWidth
+                required
+                inputProps={{ min: "1" }}
+              />
+              
+              <TextField
+                label="Entry Price ($) *"
+                type="number"
+                value={entry || ''}
+                onChange={(e) => setEntry(parseFloat(e.target.value) || 0)}
+                fullWidth
+                required
+              />
+              
+              <TextField
+                label={`Stop Loss ${mode === 'price' ? 'Price' : mode.charAt(0).toUpperCase() + mode.slice(1)} *`}
+                type="number"
+                value={stopLossInput || ''}
+                onChange={(e) => setStopLossInput(parseFloat(e.target.value) || 0)}
+                fullWidth
+                required
+              />
+            </Stack>
+          </Box>
+          
+          {/* Take Profits Section */}
+          <Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+              <Typography variant="h6" fontWeight={600}>
+                Take Profits
+              </Typography>
+              <Button 
+                variant="contained" 
+                startIcon={<AddIcon />}
+                size="small"
+                onClick={addTakeProfit}
+              >
+                Add Take Profit
+              </Button>
+            </Box>
+            
+            <Stack spacing={2}>
+              {takeProfitsInput.map((tp, index) => (
+                <Box key={index} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" color="text.secondary" mb={0.5} display="block">
+                      {entry > 0 ? 'Target value' : 'Enter entry first'}
+                    </Typography>
+                    <TextField
+                      type="number"
+                      placeholder={`Take Profit ${index + 1}`}
+                      value={tp.value || ''}
+                      onChange={(e) => updateTakeProfit(index, parseFloat(e.target.value) || 0)}
+                      fullWidth
+                      required
+                      size="small"
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" color="text.secondary" mb={0.5} display="block">
+                      Auto-calculated from target
+                    </Typography>
+                    <TextField
+                      placeholder="Percentage"
+                      value={tp.percentage > 0 ? `${tp.percentage}%` : ''}
+                      disabled
+                      fullWidth
+                      size="small"
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-end', sm: 'center' }, mt: { xs: 1, sm: 0 } }}>
+                    <IconButton 
+                      onClick={() => removeTakeProfit(index)}
+                      disabled={takeProfitsInput.length <= 1}
+                      size="small"
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+          
+          {/* Type Section (Buy/Sell) */}
+          <Box>
+            <Typography variant="h6" fontWeight={600} mb={2}>
+              Type
+            </Typography>
+            
+            <ToggleButtonGroup
+              value={type}
+              exclusive
+              onChange={handleTypeChange}
+              aria-label="trade type"
+              fullWidth
+            >
+              <ToggleButton 
+                value="buy"
+                sx={{ 
+                  py: 1.5,
+                  '&.Mui-selected': {
+                    backgroundColor: 'success.light',
+                    color: 'success.dark',
+                    borderColor: 'success.main'
+                  }
+                }}
+              >
+                Buy
+              </ToggleButton>
+              <ToggleButton 
+                value="sell"
+                sx={{ 
+                  py: 1.5,
+                  '&.Mui-selected': {
+                    backgroundColor: 'error.light',
+                    color: 'error.dark',
+                    borderColor: 'error.main'
+                  }
+                }}
+              >
+                Sell
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          
+          {/* Warning Box */}
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              p: 2, 
+              bgcolor: 'warning.light', 
+              borderRadius: 1,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 2,
+              mt: 2
+            }}
+          >
+            <WarningAmberIcon color="warning" />
+            <Box>
+              <Typography variant="body2" fontWeight={600}>Important:</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Signals cannot be deleted once sent. You can update them later, but they will remain visible to subscribers.
+              </Typography>
+            </Box>
+          </Paper>
+        </Stack>
+      </Box>
+    </Paper>
+  );
+
+  // Preview Card Component
+  const PreviewCardComponent = (
+    <Card sx={{ borderRadius: 2 }}>
+      <CardHeader title="Signal Preview" />
+      <Divider />
+      <CardContent>
+        <Stack spacing={2}>
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Symbol:</PreviewLabel>
+            <PreviewValue>{symbol || '—'}</PreviewValue>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Contracts:</PreviewLabel>
+            <PreviewValue>{contractQuantity} {contractQuantity === 1 ? 'Contract' : 'Contracts'}</PreviewValue>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Order Type:</PreviewLabel>
+            <PreviewValue>{orderType}</PreviewValue>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Type:</PreviewLabel>
+            <Box 
+              sx={{ 
+                px: 1.5, 
+                py: 0.5, 
+                borderRadius: 1, 
+                bgcolor: type === 'buy' ? 'success.light' : 'error.light',
+                color: type === 'buy' ? 'success.dark' : 'error.dark',
+                fontWeight: 600
+              }}
+            >
               {type.toUpperCase()}
-            </span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Entry:</span>
-            <span className="preview-value">{entry > 0 ? entry.toFixed(2) : '—'}</span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Stop Loss:</span>
-            <span className="preview-value">
+            </Box>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Entry:</PreviewLabel>
+            <PreviewValue>{entry > 0 ? entry.toFixed(2) : '—'}</PreviewValue>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Stop Loss:</PreviewLabel>
+            <PreviewValue>
               {mode === 'price' 
                 ? formatPreviewValue(stopLossInput, mode)
                 : formatPreviewValue(stopLossInput, mode) + ` (${calculatedStopLoss.toFixed(2)})`}
-            </span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Take Profit:</span>
-            <span className="preview-value">
+            </PreviewValue>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Take Profit:</PreviewLabel>
+            <PreviewValue>
               {mode === 'price'
                 ? formatPreviewValue(takeProfitInput, mode)
                 : formatPreviewValue(takeProfitInput, mode) + ` (${calculatedTakeProfit.toFixed(2)})`}
-            </span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Potential Profit:</span>
-            <span className="preview-value" style={{ color: 'var(--accent-color-buy)' }}>
+            </PreviewValue>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Potential Profit:</PreviewLabel>
+            <Typography color="success.main" fontWeight={500}>
               ${potentialProfit.toFixed(2)}
-            </span>
-          </div>
-          <div className="preview-row">
-            <span className="preview-label">Potential Loss:</span>
-            <span className="preview-value" style={{ color: 'var(--accent-color-sell)' }}>
+            </Typography>
+          </Box>
+          
+          <Box display="flex" justifyContent="space-between">
+            <PreviewLabel>Potential Loss:</PreviewLabel>
+            <Typography color="error.main" fontWeight={500}>
               ${potentialLoss.toFixed(2)}
-            </span>
-          </div>
-          <div className="preview-desc">
-            <p>{description || 'Your signal description will appear here...'}</p>
-          </div>
-        </div>
-      </div>
+            </Typography>
+          </Box>
+          
+          <Divider />
+          
+          <Typography variant="body2" color="text.secondary">
+            {description || 'Your signal description will appear here...'}
+          </Typography>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
 
-      {/* Signal Form Modal */}
-      <div className="modal">
-        <div className="modal-header">
-          <h2 className="modal-title">Create New Signal</h2>
-          <button className="close-button">&times;</button>
-        </div>
-        <div className="divider"></div>
-        <div className="modal-body">
-          <form>
-            {/* Chart Upload Section */}
-            <div className="form-section">
-              <h3 className="section-title">Chart Image (Optional)</h3>
-              <div 
-                className="upload-area" 
-                onDragOver={handleDragOver} 
-                onDrop={handleDrop}
-              >
-                {image ? (
-                  <img src={image} alt="Chart" className="uploaded-image" />
-                ) : (
-                  <>
-                    <div className="upload-icon">
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 15V3M12 3L7 8M12 3L17 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M3 15V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <p className="upload-text">Drag & Drop Image</p>
-                    <p className="upload-subtext">or</p>
-                    <button type="button" className="browse-button" onClick={handleBrowseClick}>
-                      <span className="browse-icon">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </span>
-                      Browse Files
-                    </button>
-                    <input 
-                      type="file" 
-                      className="upload-input" 
-                      ref={fileInputRef} 
-                      accept="image/*" 
-                      onChange={handleImageUpload} 
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Asset Information Section */}
-            <div className="form-section">
-              <h3 className="section-title">Asset Information</h3>
-              <div className="form-group">
-                <div className="select-container">
-                  <select 
-                    className="form-input select"
-                    value={symbol}
-                    onChange={(e) => setSymbol(e.target.value)}
-                  >
-                    <option value="">Select Symbol *</option>
-                    {cmeFutures.map(future => (
-                      <option key={future.symbol} value={future.symbol}>
-                        {future.symbol} - {future.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  placeholder="Asset Name *" 
-                  value={assetName}
-                  readOnly
-                  required 
-                />
-              </div>
-            </div>
-
-            {/* Signal Details Section */}
-            <div className="form-section">
-              <h3 className="section-title">
-                Signal Details
-                <span className="info-icon">ⓘ</span>
-              </h3>
-              
-              {/* Pill Selector for Price/Points/Ticks */}
-              <div className="form-group">
-                <div className="pill-selector">
-                  <button 
-                    type="button" 
-                    className={`pill-button ${mode === 'price' ? 'active' : ''}`} 
-                    onClick={() => setMode('price')}
-                  >
-                    Price
-                  </button>
-                  <button 
-                    type="button" 
-                    className={`pill-button ${mode === 'points' ? 'active' : ''}`} 
-                    onClick={() => setMode('points')}
-                  >
-                    Points
-                  </button>
-                  <button 
-                    type="button" 
-                    className={`pill-button ${mode === 'ticks' ? 'active' : ''}`} 
-                    onClick={() => setMode('ticks')}
-                  >
-                    Ticks
-                  </button>
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <textarea 
-                  className="form-input textarea" 
-                  placeholder="Description *" 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                ></textarea>
-              </div>
-              
-              <div className="form-group">
-                <div className="select-container">
-                  <select 
-                    className="form-input select"
-                    value={orderType}
-                    onChange={(e) => setOrderType(e.target.value as 'MARKET' | 'LIMIT' | 'STOP')}
-                  >
-                    <option value="MARKET">MARKET</option>
-                    <option value="LIMIT">LIMIT</option>
-                    <option value="STOP">STOP</option>
-                  </select>
-                </div>
-              </div>
-              
-              {/* Contract Quantity input field */}
-              <div className="form-group">
-                <div style={{ position: 'relative' }}>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    placeholder="How Many Contracts *" 
-                    value={contractQuantity || ''}
-                    onChange={(e) => setContractQuantity(parseInt(e.target.value) || 1)}
-                    min="1"
-                    required 
-                    style={{ paddingRight: '90px' }}
-                  />
-                  <span style={{ 
-                    position: 'absolute', 
-                    right: '12px', 
-                    top: '50%', 
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-secondary)',
-                    pointerEvents: 'none'
-                  }}>
-                    {contractQuantity === 1 ? 'Contract' : 'Contracts'}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Entry is always a price */}
-              <div className="form-group">
-                <input 
-                  type="number" 
-                  className="form-input" 
-                  placeholder="Entry Price ($) *" 
-                  value={entry || ''}
-                  onChange={(e) => setEntry(parseFloat(e.target.value) || 0)}
-                  required 
-                />
-              </div>
-              
-              {/* Stop Loss can be price, points, or ticks */}
-              <div className="form-group">
-                <input 
-                  type="number" 
-                  className="form-input" 
-                  placeholder={`Stop Loss ${mode === 'price' ? 'Price' : mode.charAt(0).toUpperCase() + mode.slice(1)} *`} 
-                  value={stopLossInput || ''}
-                  onChange={(e) => setStopLossInput(parseFloat(e.target.value) || 0)}
-                  required 
-                />
-              </div>
-            </div>
-
-            {/* Take Profits Section */}
-            <div className="form-section">
-              <h3 className="section-title">
-                Take Profits
-                <button type="button" className="add-button" onClick={addTakeProfit}>
-                  <span className="add-icon">+</span>
-                  Add Take Profit
-                </button>
-              </h3>
-              
-              {takeProfitsInput.map((tp, index) => (
-                <div className="input-row" key={index}>
-                  <div className="form-group">
-                    <span className="entry-label">{entry > 0 ? 'Target value' : 'Enter entry first'}</span>
-                    <input 
-                      type="number" 
-                      className="form-input" 
-                      placeholder={`Take Profit ${index + 1} ${mode === 'price' ? 'Price' : mode.charAt(0).toUpperCase() + mode.slice(1)} *`} 
-                      value={tp.value || ''}
-                      onChange={(e) => updateTakeProfit(index, parseFloat(e.target.value) || 0)}
-                      required 
-                    />
-                  </div>
-                  <div className="form-group">
-                    <span className="entry-label">Auto-calculated from target</span>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder={`Percentage ${index + 1} (%) *`} 
-                      value={tp.percentage > 0 ? `${tp.percentage}%` : ''}
-                      disabled
-                    />
-                  </div>
-                  <button 
-                    type="button" 
-                    className="remove-button"
-                    onClick={() => removeTakeProfit(index)}
-                  >
-                    −
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            {/* Type Section (Buy/Sell) */}
-            <div className="form-section">
-              <h3 className="section-title">Type</h3>
-              
-              <div className="option-buttons">
-                <button 
-                  type="button" 
-                  className={`option-button buy ${type === 'buy' ? 'active' : ''}`}
-                  onClick={() => setType('buy')}
-                >
-                  Buy
-                </button>
-                <button 
-                  type="button" 
-                  className={`option-button sell ${type === 'sell' ? 'active' : ''}`}
-                  onClick={() => setType('sell')}
-                >
-                  Sell
-                </button>
-              </div>
-            </div>
-
-            {/* Warning Box */}
-            <div className="warning-box">
-              <div className="warning-icon">⚠️</div>
-              <div className="warning-text">
-                <strong>Important:</strong> Signals cannot be deleted once sent. You can update them later, but they will remain visible to subscribers.
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+  // Layout: For desktop (md+) preview appears on the left; for mobile the form appears first then preview below.
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 4,
+        }}
+      >
+        {/* On mobile (xs): SignalForm first (order 1), preview second (order 2);
+            On desktop/tablet (md+): preview on the left (order 1), form on the right (order 2) */}
+        <Box
+          sx={{
+            order: { xs: 2, md: 1 },
+            width: { md: '300px' },
+            flexShrink: 0,
+          }}
+        >
+          {PreviewCardComponent}
+        </Box>
+        <Box
+          sx={{
+            order: { xs: 1, md: 2 },
+            flex: 1,
+          }}
+        >
+          {SignalFormComponent}
+        </Box>
+      </Box>
+    </Container>
   );
 };
 
